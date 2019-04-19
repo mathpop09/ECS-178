@@ -1,0 +1,6 @@
+#include <GL/glut.h>
+#include <math.h>
+#include <vector>
+#include <iostream>
+#include "linedraw.h"
+using namespace std;
