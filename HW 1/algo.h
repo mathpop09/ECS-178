@@ -19,7 +19,7 @@ class algo{
   //de Castlejau
 
 public:
-  void deCastlejau(vector<dim> coordinates);
+  void deCastlejau(vector<dim> coordinates, double t);
 
 };
 

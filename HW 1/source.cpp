@@ -6,12 +6,17 @@ using namespace std;
 vector<vector<dim>> curves;
 vector<dim> coordinates;
 
+//Store the Castlehau Curves and its t Values
+vector<vector<dim>> CastlejauCurves;
+vector<double> tValues;
+
 int pointsNum = 0;
 
 algo ag;
 
 void promptUser(void)
 {
+	//Separate the Bernstein-Casteljau Drawing Window and the Curve-Curve Intersection Window
 	//Bezier Curve Prompt
 	cout << "Hello! How many coordinates are on your control polygon?" << endl;
 	cin >> pointsNum;
@@ -26,7 +31,7 @@ void promptUser(void)
 			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
 			coordinates.push_back({coorX, coorY});
 	}
-	ag.deCastlejau(coordinates);
+	ag.deCastlejau(coordinates, 0.2);
 	coordinates.clear();
 
 
