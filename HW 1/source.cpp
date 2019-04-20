@@ -31,7 +31,7 @@ void promptUser(void)
 			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
 			coordinates.push_back({coorX, coorY});
 	}
-	ag.deCastlejau(coordinates, 0.2);
+	ag.Bernstein(coordinates, 10);
 	coordinates.clear();
 
 

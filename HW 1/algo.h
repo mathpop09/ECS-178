@@ -19,8 +19,11 @@ class algo{
   //de Castlejau
 
 public:
-  void deCastlejau(vector<dim> coordinates, double t);
+  void deCastlejau(vector<dim> coordinates, double t, int res);
+  void Bernstein(vector<dim> coordinates, int res);
 
+private:
+  vector<vector<int>> Pascals (int level);
 };
 
 #endif // ALGO_H
