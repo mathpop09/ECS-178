@@ -22,13 +22,12 @@ void algo::deCastlejau (vector<dim> coordinates)
 
 
   //number of dots to be connected
-  int resolution = 20;
+  int resolution = 40;
   double tVals[resolution+1];
   double tValue = 0;
 
   for (int i = 0; i < resolution; i++)
   {
-    cout << tValue << endl;
     tVals[i] = tValue;
     tValue += (1.0/resolution);
   }
@@ -52,6 +51,7 @@ void algo::deCastlejau (vector<dim> coordinates)
       double yPush = 0;
       for (int j = looper.size() - 1; j > 0 ; j--)
       {
+        cout << "j: " << j << endl;
         double xVal = looper[j-1].x - looper[j].x;
         xPush = looper[j].x + (xVal * tVals[h]);
 
@@ -73,7 +73,7 @@ void algo::deCastlejau (vector<dim> coordinates)
           reverse(temp.begin(),temp.end());
           looper = temp;
           temp.clear();
-          j ++;
+          j = looper.size();
         }
       }
 
@@ -89,5 +89,7 @@ void algo::deCastlejau (vector<dim> coordinates)
     cout << castDraw.size();
 	}
   glEnd();
+  coordinates.clear();
+  castDraw.clear();
 
 }
