@@ -7,8 +7,5 @@ source.o: source.cpp
 algo.o: algo.cpp algo.h
 	g++ -c -Wno-narrowing algo.cpp
 
-userprompt.o: userprompt.cpp userprompt.h
-	g++ -c -Wno-narrowing userprompt.cpp
-
 clean:
 	rm *.o source.out

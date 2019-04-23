@@ -22,9 +22,15 @@ public:
   void deCasteljau(vector<dim> coordinates, double t, int res);
   void Bernstein(vector<dim> coordinates, int res);
   dim singleT (vector<dim> points, double tVal);
+  vector<vector<dim>> modSubDiv (vector<dim> curve);
+  void IntersectionCheck(vector<dim> curve1, vector<dim> curve2, double tolerance);
+
+
 
 private:
   vector<vector<int>> Pascals (int level);
+  bool boxIntersection (vector<dim> points1, vector<dim> points2);
+  double area (vector<dim> curve);
 };
 
 #endif // ALGO_H

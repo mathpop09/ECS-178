@@ -15,6 +15,9 @@ vector<double> tValues;
 //Store the Bernstein Curves
 vector<vector<dim>> BernsteinCurves;
 
+//Curve-Curve Intersection Curves. Always will be Bernstein, but stored separately
+//[0] and [1] will be tested for intersection, [2] and [3], [4] and [5], etc etc
+vector<vector<dim>> IntersectionCurves;
 int pointsNum = 0;
 
 algo ag;
@@ -104,29 +107,38 @@ void subDivision(int index, double t, bool castel)
 
 void promptUser(void)
 {
-	//Separate the Bernstein-Casteljau Drawing Window and the Curve-Curve Intersection Window
-	//Bezier Curve Prompt
-	cout << "Hello! How many coordinates are on your control polygon?" << endl;
-	cin >> pointsNum;
-	cout << "Please enter your " << pointsNum << " control points. Format: x y" << endl;
-	//loop over the number of control points
-	for (int i = 0; i < pointsNum; i++)
+	bool intersection;
+	//Two modes, regular curve drawing or intersection
+	cout << "Hello! Would you like to perform an intersection or would you just like to draw some curves? false for Curve Drawing/true for Intersection" << endl;
+	cin >> intersection;
+	if (intersection == false)
 	{
-			double coorX = 0;
-			double coorY = 0;
-			cout << "Control Point " << (i + 1) << ": " << endl;
-			cin >> coorX >> coorY;
-			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
-			coordinates.push_back({coorX, coorY});
+		//Separate the Bernstein-Casteljau Drawing Window and the Curve-Curve Intersection Window
+		//Bezier Curve Prompt
+		for (int j = 0; j < 2; j++)
+		{
+			cout << "Hello! How many coordinates are on your control polygon?" << endl;
+			cin >> pointsNum;
+			cout << "Please enter your " << pointsNum << " control points. Format: x y" << endl;
+			//loop over the number of control points
+			for (int i = 0; i < pointsNum; i++)
+			{
+					double coorX = 0;
+					double coorY = 0;
+					cout << "Control Point " << (i + 1) << ": " << endl;
+					cin >> coorX >> coorY;
+					cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
+					coordinates.push_back({coorX, coorY});
+			}
+			BernsteinCurves.push_back(coordinates);
+			coordinates.clear();
+		}
+		ag.Bernstein(BernsteinCurves[0], 30);
+		ag.Bernstein(BernsteinCurves[1], 30);
+		ag.IntersectionCheck (BernsteinCurves[0], BernsteinCurves[1], 0.005);
+
 	}
-	CasteljauCurves.push_back(coordinates);
-	tValues.push_back(0.3);
-	subDivision(0, 0.4, true);
-	ag.deCasteljau(CasteljauCurves[0], 0.7, 50);
-	ag.deCasteljau(CasteljauCurves[1], 0.7, 50);
-	coordinates.clear();
-
-
+	//else if (intersection == false)
 }
 
 void renderScene(void)
