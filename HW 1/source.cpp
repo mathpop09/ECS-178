@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "algo.h"
+#include <chrono>
 using namespace std;
 
 vector<vector<dim>> curves;
@@ -185,6 +186,8 @@ void recycle(int res)
 	{
 		ag.deCasteljau(CasteljauCurves[k], tValues[k], res);
 	}
+	recycle(res);
+
 }
 
 void promptUser(void)
@@ -251,11 +254,19 @@ void promptUser(void)
   	glFlush();
 		for (int k = 0; k < BernsteinCurves.size(); k++)
 		{
+			auto start = std::chrono::high_resolution_clock::now();
 			ag.Bernstein(BernsteinCurves[k], res);
+			auto finish = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> elapsed = finish - start;
+			std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 		}
 		for (int k = 0; k < CasteljauCurves.size(); k++)
 		{
+			auto start = std::chrono::high_resolution_clock::now();
 			ag.deCasteljau(CasteljauCurves[k], tValues[k], res);
+			auto finish = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> elapsed = finish - start;
+			std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 		}
 
 	}
