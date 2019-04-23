@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void algo::deCastlejau (vector<dim> coordinates, double t, int res)
+void algo::deCasteljau (vector<dim> coordinates, double t, int res)
 {
 
   dim tPoint;
@@ -30,7 +30,7 @@ void algo::deCastlejau (vector<dim> coordinates, double t, int res)
 
 
   vector<dim> castDraw;
-  //Do Castlejau's
+  //Do Casteljau's
   //loop over all the t-values
   for (int h = 0; h <= resolution; h++)
   {
@@ -144,7 +144,6 @@ vector<vector<int>> algo::Pascals (int level)
         row.push_back(pushed);
       }
     }
-    cout << endl;
     //push created level to triangle and clear the level vector
     triangle.push_back(row);
     row.clear();
@@ -207,6 +206,191 @@ void algo::Bernstein (vector<dim> coordinates, int res)
     glVertex2f(drawBern[i].x, drawBern[i].y);
 	}
   glEnd();
+}
+
+//get specific C(t)
+dim algo::singleT (vector<dim> points, double tVal)
+{
+  Pascals(points.size());
+  vector<int> coeff = Pascals(points.size())[points.size()-1];
+
+  double x = 0;
+  double y = 0;
+  for (int i = 0; i < points.size(); i++)
+  {
+    x += (coeff[i] * pow(tVal, i) * pow((1 - tVal), points.size() - 1 - i)) * points[i].x;
+    y += (coeff[i] * pow(tVal, i) * pow((1 - tVal), points.size() - 1 - i)) * points[i].y;
+  }
+  return {x, y};
+}
+
+//min-max box intersection
+//checks if two min max boxes intersection
+bool algo::boxIntersection (vector<dim> points1, vector<dim> points2)
+{
+  double minx1 = 1;
+  double miny1 = 1;
+  double maxx1 = -1;
+  double maxy1 = -1;
+
+  double minx2 = 1;
+  double miny2 = 1;
+  double maxx2 = -1;
+  double maxy2 = -1;
+
+  //loop over control points in curve 1
+  for (int i = 0; i < points1.size(); i++)
+  {
+    if (points1[i].x < minx1)
+    {
+      minx1 = points1[i].x;
+    }
+    if (points1[i].x > maxx1)
+    {
+      maxx1 = points1[i].x;
+    }
+
+    if (points1[i].y < miny1)
+    {
+      miny1 = points1[i].y;
+    }
+    if (points1[i].y > maxy1)
+    {
+      maxy1 = points1[i].y;
+    }
+  }
+
+  //loop over control points in curve 2
+  for (int i = 0; i < points2.size(); i++)
+  {
+    if (points2[i].x < minx2)
+    {
+      minx2 = points2[i].x;
+    }
+    if (points2[i].x > maxx2)
+    {
+      maxx2 = points2[i].x;
+    }
+
+    if (points2[i].y < miny2)
+    {
+      miny2 = points2[i].y;
+    }
+    if (points2[i].y > maxy2)
+    {
+      maxy2 = points2[i].y;
+    }
+  }
+
+  if (minx1 > maxx2 || minx2 > maxx1 || miny1 > maxy2 || miny2 > maxy1)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+double algo::area (vector<dim> curve)
+{
+  double minx = 1;
+  double miny = 1;
+  double maxx = -1;
+  double maxy = -1;
+
+  //loop over control points in curve 1
+  for (int i = 0; i < curve.size(); i++)
+  {
+    if (curve[i].x < minx)
+    {
+      minx = curve[i].x;
+    }
+    if (curve[i].x > maxx)
+    {
+      maxx = curve[i].x;
+    }
+
+    if (curve[i].y < miny)
+    {
+      miny = curve[i].y;
+    }
+    if (curve[i].y > maxy)
+    {
+      maxy = curve[i].y;
+    }
+  }
+  return ((maxx - minx) * (maxy - miny));
+}
+
+//modified sub divison only for intersection detection
+vector<vector<dim>> algo::modSubDiv(vector<dim> curve)
+{
+	vector<dim> subCurve1;
+	vector<dim> subCurve2;
+	vector<dim> smallCurve;
 
 
+	//calculate the first curve
+	for(int i = 0; i < curve.size(); i++)
+	{
+		if (i == 0)
+		{
+			subCurve1.push_back(curve[0]);
+		}
+		else
+		{
+			for(int j = 0; j <= i; j++)
+			{
+				smallCurve.push_back(curve[j]);
+			}
+			subCurve1.push_back(singleT(smallCurve, 0.5));
+			smallCurve.clear();
+		}
+	}
+
+	//calculate the second curve
+	for(int i = curve.size() - 1; i >= 0; i--)
+	{
+		if (i == curve.size() - 1)
+		{
+			subCurve2.push_back(curve[curve.size()-1]);
+		}
+		else
+		{
+			for(int j = curve.size() - 1; j >= i; j--)
+			{
+				smallCurve.push_back(curve[j]);
+			}
+			subCurve2.push_back(singleT(smallCurve, 0.5));
+			smallCurve.clear();
+		}
+	}
+  return {subCurve1, subCurve2};
+}
+
+//recursive intersection check
+void algo::IntersectionCheck (vector<dim> curve1, vector<dim> curve2, double tol)
+{
+  double tolerance  = tol * tol;
+  //If the box intersects and the area is above the tolerance
+  //run intersectioncheck on subdivided curves.
+  if (boxIntersection(curve1, curve2) == true && (area(curve1) > tolerance) && (area(curve2) > tolerance))
+  {
+    IntersectionCheck(modSubDiv(curve1)[0], modSubDiv(curve2)[0], tol);
+    IntersectionCheck(modSubDiv(curve1)[0], modSubDiv(curve2)[1], tol);
+    IntersectionCheck(modSubDiv(curve1)[1], modSubDiv(curve2)[0], tol);
+    IntersectionCheck(modSubDiv(curve1)[1], modSubDiv(curve2)[1], tol);
+  }
+  else if (boxIntersection(curve1, curve2) == false)
+  {
+  }
+  else if (boxIntersection(curve1, curve2) == true && ((area(curve1) < tolerance) || (area(curve2) < tolerance)))
+  {
+    glColor3f(1,1,0);
+    glPointSize(5.0f);
+    glBegin(GL_POINTS);
+    glVertex2f(curve1[0].x, curve1[0].y);
+    glEnd();
+  }
 }
