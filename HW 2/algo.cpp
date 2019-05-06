@@ -362,24 +362,14 @@ BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 */
 
-dim linearInterpolationPoint (dim point1, dim point2, double length1, double length2)
+double algo::twoPointDistance (dim point1, dim point2)
 {
-  double ratio = (length1) / (length1 + length2);
-
   dim copyP1 = point1;
   dim copyP2 = point2;
 
-  dim vectorLine;
-  vectorLine.x = point2.x - point1.x;
-  vectorLine.y = point2.y - point1.y;
+  double distance = sqrt(pow((point1.x - point2.x), 2) + pow((point1.y - point2.y), 2));
 
-  vectorLine.x = vectorLine.x * ratio;
-  vectorLine.y = vectorLine.y * ratio;
-
-  copyP1.x = copyP1.x + vectorLine.x;
-  copyP1.y = copyP1.y + vectorLine.y;
-
-  return {copyP1.x, copyP1.y};
+  return distance;
 }
 
 void algo::Aitkens (vector<dim> coordinates, double t, int res)
@@ -390,6 +380,7 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
   double tVals[resolution+1];
   double tValue = 0;
   double drawT = (round((1-t) * 100))/100;
+
 
   for (int i = 0; i < resolution; i++)
   {
@@ -403,10 +394,23 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
   double tIndex[coordinates.size()];
   tValue = 0;
 
+  //length of all chords
+  double totalLength = 0;
+  for (int i = 1; i < coordinates.size(); i++)
+  {
+    totalLength += twoPointDistance(coordinates[i-1], coordinates[i]);
+  }
+
+  //Implemented chord length parametrization
+  double toAdd = 0;
   for (int i = 0; i < coordinates.size(); i++)
   {
     tIndex[i] = tValue;
-    tValue += (1.0/(coordinates.size()-1));
+    if (i != coordinates.size() - 1)
+    {
+      toAdd = (twoPointDistance(coordinates[i], coordinates[i + 1]) / totalLength);
+    }
+    tValue += toAdd;
   }
 
 
@@ -501,4 +505,101 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
 
   coordinates.clear();
   castDraw.clear();
+}
+
+/* START OF PART C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+*/
+
+void algo::CCInterp(vector<dim> points, vector<dim> derivativeVectors, int res)
+{
+
+  //number of dots to be connected
+  int resolution = res;
+  double tVals[resolution+1];
+  double tValue = 0;
+
+  for (int i = 0; i < resolution; i++)
+  {
+    tVals[i] = tValue;
+    tValue += (1.0/resolution);
+  }
+
+  tVals[resolution] = tValue;
+  //t's are now filled out from 0, 0.01, 0.02... to 1
+
+  //length of all chords
+  double totalLength = 0;
+  for (int i = 1; i < points.size(); i++)
+  {
+    totalLength += twoPointDistance(points[i-1], points[i]);
+  }
+
+  double tIndex[points.size()];
+  //Implemented chord length parametrization
+  double toAdd = 0;
+  tValue = 0;
+  for (int i = 0; i < points.size(); i++)
+  {
+    cout << tValue << endl;
+    tIndex[i] = tValue;
+    if (i != points.size() - 1)
+    {
+      toAdd = (twoPointDistance(points[i], points[i + 1]) / totalLength);
+    }
+    tValue += toAdd;
+  }
+
+
+
+  vector<dim> toDraw;
+  for (int t = 0; t < resolution; t++)
+  {
+    double h0 = 1 - (3 * tVals[t] * tVals[t]) + (2 * tVals[t] * tVals[t] * tVals[t]);
+    double h1 = (3 * tVals[t] * tVals[t]) - (2 * tVals[t] * tVals[t]);
+    double h0bar = tVals[t] - (2 * tVals[t] * tVals[t]) + (tVals[t] * tVals[t] * tVals[t]);
+    double h1bar = ((-1) * tVals[t] * tVals[t]) + (tVals[t] * tVals[t] * tVals[t]);
+
+    int theCorrectI = 0;
+    for (int i = 1; i < points.size(); i++)
+    {
+      if ((tVals[t] < tIndex[i]) && (theCorrectI == 0))
+      {
+        theCorrectI = i;
+      }
+    }
+    double pushX = (points[theCorrectI-1].x * h0) + (points[theCorrectI].x * h1) + (derivativeVectors[theCorrectI-1].x * h0bar) + (derivativeVectors[theCorrectI].x * h1bar);
+    double pushY = (points[theCorrectI-1].y * h0) + (points[theCorrectI].y * h1) + (derivativeVectors[theCorrectI-1].y * h0bar) + (derivativeVectors[theCorrectI].y * h1bar);
+    cout << pushX << ", " << pushY << endl;
+    toDraw.push_back({pushX, pushY});
+  }
+
+  //draw out the polygon created by the points.
+  //make polygon red
+  glColor3f(1.0,0,0);
+  glBegin(GL_LINES);
+  for (int i = 1; i < points.size(); i++)
+  {
+    glVertex2f(points[i-1].x, points[i-1].y);
+    glVertex2f(points[i].x, points[i].y);
+  }
+  glEnd();
+
+
+	// with the draw vector, connect all of the points in the vector together.
+  glColor3f(0,1.0,0);
+  glBegin(GL_LINES);
+	for (int i = 1; i < toDraw.size(); i++)
+  {
+    glVertex2f(toDraw[i-1].x, toDraw[i-1].y);
+    glVertex2f(toDraw[i].x, toDraw[i].y);
+	}
+  glEnd();
+
+  toDraw.clear();
 }

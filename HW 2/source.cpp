@@ -15,9 +15,8 @@ vector<vector<dim>> ElevatedCurves;
 //Store the Bernstein Curves
 vector<vector<dim>> BernsteinCurves;
 
-//Curve-Curve Intersection Curves. Always will be Bernstein, but stored separately
-//[0] and [1] will be tested for intersection, [2] and [3], [4] and [5], etc etc
-vector<vector<dim>> IntersectionCurves;
+//Stors the derivative vectors for the curve
+vector<dim> derVectors;
 int pointsNum = 0;
 
 int res = 0;
@@ -106,7 +105,7 @@ void degreeRaising()
 {
 	cout << "Hello! How many coordinates are on your control polygon?" << endl;
 	cin >> pointsNum;
-	cout << "What resolution would you like your curves to be?" << endl;
+	cout << "What resolution would you like your curve to be?" << endl;
 	cin >> res;
 	cout << "Please enter your " << pointsNum << " control points. Format: x y" << endl;
 	//loop over the number of control points
@@ -136,7 +135,7 @@ void degreeLowering()
 {
 	cout << "Hello! How many coordinates are on your control polygon?" << endl;
 	cin >> pointsNum;
-	cout << "What resolution would you like your curves to be?" << endl;
+	cout << "What resolution would you like your curve to be?" << endl;
 	cin >> res;
 	cout << "Please enter your " << pointsNum << " control points. Format: x y" << endl;
 	//loop over the number of control points
@@ -209,7 +208,7 @@ void Aitkens()
 {
 	cout << "Hello! How many coordinates are on your control polygon?" << endl;
 	cin >> pointsNum;
-	cout << "What resolution would you like your curves to be? (Must be 100 or greater)" << endl;
+	cout << "What resolution would you like your curve to be? (Must be 100 or greater)" << endl;
 	cin >> res;
 	cout << "Please enter your " << pointsNum << " control points. Format: x y" << endl;
 	//loop over the number of control points
@@ -240,6 +239,89 @@ void Aitkens()
 	recycleAitkens();
 }
 
+void recycleCCInterp()
+{
+	cout << "Curve 0: " << endl;
+	for (int j = 0; j < BernsteinCurves[0].size(); j++)
+	{
+		cout << "  Index: " << j << " " << BernsteinCurves[0][j].x << ", " << BernsteinCurves[0][j].y << endl;
+	}
+
+	cout << "Please send me the curve you want to modify and the proper modifications [Index Number] [(I)nsert/(D)elete]" << endl;
+	int iNum;
+	cin >> iNum;
+
+	string insDel;
+	cin >> insDel;
+
+	if (insDel == "I")
+	{
+		cout << "What are the coordinates?" << endl;
+		double xcoor;
+		double ycoor;
+		cin >> xcoor >> ycoor;
+		BernsteinCurves[0].insert(BernsteinCurves[0].begin() + iNum, {xcoor, ycoor});
+
+		double vecX = 0.0;
+		double vecY = 0.0;
+		cout << "What is the the derivative vector at this new points?" << endl;
+		cin >> vecX >> vecY;
+		derVectors.insert(derVectors.begin() + iNum, {vecX, vecY});
+	}
+	else
+	{
+		BernsteinCurves[0].erase(BernsteinCurves[0].begin() + iNum);
+		derVectors.erase(derVectors.begin() + iNum);
+	}
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (int k = 0; k < BernsteinCurves.size(); k++)
+	{
+		ag.CCInterp(BernsteinCurves[k], derVectors, res);
+	}
+	glutSwapBuffers();
+	recycleCCInterp();
+}
+
+void CCInterp()
+{
+	cout << "Hello! How many coordinates are on your control polygon?" << endl;
+	cin >> pointsNum;
+	cout << "What resolution would you like your curve to be?" << endl;
+	cin >> res;
+	cout << "Please enter your " << pointsNum << " control points and derivative vectors. Format: x y" << endl;
+	//loop over the number of control points
+	for (int i = 0; i < pointsNum; i++)
+	{
+			double coorX = 0;
+			double coorY = 0;
+			cout << "Control Point " << (i + 1) << ": " << endl;
+			cin >> coorX >> coorY;
+			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
+			coordinates.push_back({coorX, coorY});
+
+			double vecX = 0.0;
+			double vecY = 0.0;
+			cout << "Derivative Vector " << (i + 1) << ": " << endl;
+			cin >> vecX >> vecY;
+			derVectors.push_back({vecX, vecY});
+	}
+	BernsteinCurves.push_back(coordinates);
+	coordinates.clear();
+
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glFlush();
+
+	for (int k = 0; k < BernsteinCurves.size(); k++)
+	{
+		ag.CCInterp(BernsteinCurves[k], derVectors, res);
+	}
+	glutSwapBuffers();
+	recycleCCInterp();
+}
+
 void promptUser(void)
 {
 	string CI;
@@ -268,7 +350,7 @@ void promptUser(void)
 	}
 	else if (CI == "P")
 	{
-
+		CCInterp();
 	}
 }
 

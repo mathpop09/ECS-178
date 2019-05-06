@@ -26,13 +26,13 @@ public:
   void degreeRaised (vector<dim> points, int res);
   void degreeLowerAvg (vector<dim> points, int res);
   void Aitkens (vector<dim> coordinates, double t, int res);
-
+  void CCInterp (vector<dim> points, vector<dim> derivativeVectors, int res);
 
 private:
   vector<vector<int>> Pascals (int level);
   vector<dim> degreeLowerL (vector<dim> points);
   vector<dim> degreeLowerR (vector<dim> points);
-  dim linearInterpolationPoint (dim point1, dim point2, double ratio);
+  double twoPointDistance (dim point1, dim point2);
 };
 
 #endif // ALGO_H
