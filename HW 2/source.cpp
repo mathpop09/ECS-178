@@ -162,6 +162,49 @@ void degreeLowering()
 	recycleDRa();
 }
 
+void recycleAitkens()
+{
+	cout << "Curve 0: " << endl;
+	for (int j = 0; j < BernsteinCurves[0].size(); j++)
+	{
+		cout << "  Index: " << j << " " << BernsteinCurves[0][j].x << ", " << BernsteinCurves[0][j].y << endl;
+	}
+
+	cout << "Please send me the curve you want to modify and the proper modifications [Index Number] [(I)nsert/(D)elete]" << endl;
+	int iNum;
+	cin >> iNum;
+
+	string insDel;
+	cin >> insDel;
+
+	if (insDel == "I")
+	{
+		cout << "What are the coordinates?" << endl;
+		double xcoor;
+		double ycoor;
+		cin >> xcoor >> ycoor;
+		BernsteinCurves[0].insert(BernsteinCurves[0].begin() + iNum, {xcoor, ycoor});
+	}
+	else
+	{
+		BernsteinCurves[0].erase(BernsteinCurves[0].begin() + iNum);
+	}
+
+	double tPar;
+	cout << "What new t-value would you like to see?" << endl;
+	cin >> tPar;
+
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (int k = 0; k < BernsteinCurves.size(); k++)
+	{
+		ag.Aitkens(BernsteinCurves[k], tPar, res);
+	}
+	glutSwapBuffers();
+	recycleAitkens();
+}
+
 void Aitkens()
 {
 	cout << "Hello! How many coordinates are on your control polygon?" << endl;
@@ -191,11 +234,10 @@ void Aitkens()
 
 	for (int k = 0; k < BernsteinCurves.size(); k++)
 	{
-		cout << "hello" << endl;
 		ag.Aitkens(BernsteinCurves[k], tPar, res);
-		cout << "cucky" << endl;
 	}
-
+	glutSwapBuffers();
+	recycleAitkens();
 }
 
 void promptUser(void)

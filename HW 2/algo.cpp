@@ -384,7 +384,6 @@ dim linearInterpolationPoint (dim point1, dim point2, double length1, double len
 
 void algo::Aitkens (vector<dim> coordinates, double t, int res)
 {
-  cout << "lmaos" << endl;
   dim tPoint;
   //number of dots to be connected
   int resolution = res;
@@ -404,10 +403,8 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
   double tIndex[coordinates.size()];
   tValue = 0;
 
-  cout << "BON GIORNO" << endl;
   for (int i = 0; i < coordinates.size(); i++)
   {
-    cout << tValue << endl;
     tIndex[i] = tValue;
     tValue += (1.0/(coordinates.size()-1));
   }
@@ -420,7 +417,6 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
   //loop over all the t-values
   for (int h = 0; h <= resolution; h++)
   {
-    cout << "res: " << h << endl;
     //loop over the number of lines in the polygon
     vector<dim> looper = coordinates;
     vector<dim> temp = looper;
@@ -435,33 +431,46 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
       for (int j = 0; j < temp.size() - 1 ; j++)
       {
         int plusR = (looper.size() + 1) - temp.size();
-        cout << j << endl;
         if (i == 0)
         {
           double xVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j + 1].x));
 
           double yVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j + 1].y));
-          cout << xVal << ", " << yVal << endl;
           temp2.push_back({xVal, yVal});
         }
         else if (i == looper.size() - 2)
         {
-          cout << "spitout" << endl;
           double xVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].x));
 
           double yVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].y));
-          cout << xVal << ", " << yVal << endl;
           castDraw.push_back({xVal, yVal});
+          if (abs(tVals[h] - t) < 0.005)
+          {
+            //draw the single point for the t-value
+            glColor3f(1,1,0);
+            glPointSize(5.0f);
+            glBegin(GL_POINTS);
+              glVertex2f(xVal, yVal);
+            glEnd();
+          }
         }
         else
         {
           double xVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].x));
 
           double yVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].y));
-          cout << xVal << ", " << yVal << endl;
           temp2.push_back({xVal, yVal});
         }
-
+      }
+      if (abs(tVals[h] - t) < 0.005)
+      {
+        glColor3f(0,0,1);
+        glBegin(GL_LINES);
+        for(int i = 1; i < temp2.size(); i++) {
+          glVertex2f(temp2[i-1].x, temp2[i-1].y);
+          glVertex2f(temp2[i].x, temp2[i].y);
+        }
+        glEnd();
       }
       temp.clear();
     }
@@ -489,12 +498,7 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
 	}
   glEnd();
 
-  //draw the single point for the t-value
-  glColor3f(1,1,0);
-  glPointSize(5.0f);
-  glBegin(GL_POINTS);
-    glVertex2f(tPoint.x, tPoint.y);
-  glEnd();
+
   coordinates.clear();
   castDraw.clear();
 }
