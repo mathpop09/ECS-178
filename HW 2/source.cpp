@@ -162,6 +162,42 @@ void degreeLowering()
 	recycleDRa();
 }
 
+void Aitkens()
+{
+	cout << "Hello! How many coordinates are on your control polygon?" << endl;
+	cin >> pointsNum;
+	cout << "What resolution would you like your curves to be? (Must be 100 or greater)" << endl;
+	cin >> res;
+	cout << "Please enter your " << pointsNum << " control points. Format: x y" << endl;
+	//loop over the number of control points
+	for (int i = 0; i < pointsNum; i++)
+	{
+			double coorX = 0;
+			double coorY = 0;
+			cout << "Control Point " << (i + 1) << ": " << endl;
+			cin >> coorX >> coorY;
+			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
+			coordinates.push_back({coorX, coorY});
+	}
+	BernsteinCurves.push_back(coordinates);
+	coordinates.clear();
+
+	double tPar;
+	cout << "What is your t value? [0,1]" << endl;
+	cin >> tPar;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glFlush();
+
+	for (int k = 0; k < BernsteinCurves.size(); k++)
+	{
+		cout << "hello" << endl;
+		ag.Aitkens(BernsteinCurves[k], tPar, res);
+		cout << "cucky" << endl;
+	}
+
+}
+
 void promptUser(void)
 {
 	string CI;
@@ -186,6 +222,7 @@ void promptUser(void)
 	}
 	else if (CI == "A")
 	{
+		Aitkens();
 	}
 	else if (CI == "P")
 	{

@@ -352,3 +352,148 @@ void algo::degreeLowerAvg (vector<dim> points, int res)
 
   BernsteinMagneta(newCurve, res);
 }
+
+/* START OF PART B
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+*/
+
+dim linearInterpolationPoint (dim point1, dim point2, double length1, double length2)
+{
+  double ratio = (length1) / (length1 + length2);
+
+  dim copyP1 = point1;
+  dim copyP2 = point2;
+
+  dim vectorLine;
+  vectorLine.x = point2.x - point1.x;
+  vectorLine.y = point2.y - point1.y;
+
+  vectorLine.x = vectorLine.x * ratio;
+  vectorLine.y = vectorLine.y * ratio;
+
+  copyP1.x = copyP1.x + vectorLine.x;
+  copyP1.y = copyP1.y + vectorLine.y;
+
+  return {copyP1.x, copyP1.y};
+}
+
+void algo::Aitkens (vector<dim> coordinates, double t, int res)
+{
+  cout << "lmaos" << endl;
+  dim tPoint;
+  //number of dots to be connected
+  int resolution = res;
+  double tVals[resolution+1];
+  double tValue = 0;
+  double drawT = (round((1-t) * 100))/100;
+
+  for (int i = 0; i < resolution; i++)
+  {
+    tVals[i] = tValue;
+    tValue += (1.0/resolution);
+  }
+
+  tVals[resolution] = tValue;
+  //t's are now filled out from 0, 0.01, 0.02... to 1
+
+  double tIndex[coordinates.size()];
+  tValue = 0;
+
+  cout << "BON GIORNO" << endl;
+  for (int i = 0; i < coordinates.size(); i++)
+  {
+    cout << tValue << endl;
+    tIndex[i] = tValue;
+    tValue += (1.0/(coordinates.size()-1));
+  }
+
+
+
+
+  vector<dim> castDraw;
+  //Do Casteljau's
+  //loop over all the t-values
+  for (int h = 0; h <= resolution; h++)
+  {
+    cout << "res: " << h << endl;
+    //loop over the number of lines in the polygon
+    vector<dim> looper = coordinates;
+    vector<dim> temp = looper;
+    vector<dim> temp2 = looper;
+    for (int i = 0; i < looper.size() - 1; i++)
+    {
+      //one column level calculator
+      double xVal = 0.0;
+      double yVal = 0.0;
+      temp = temp2;
+      temp2.clear();
+      for (int j = 0; j < temp.size() - 1 ; j++)
+      {
+        cout << j << endl;
+        if (i == 0)
+        {
+          double xVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (looper[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (looper[j + 1].x));
+
+          double yVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (looper[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (looper[j + 1].y));
+          cout << xVal << ", " << yVal << endl;
+          temp2.push_back({xVal, yVal});
+        }
+        else if (i == looper.size() - 2)
+        {
+          cout << "spitout" << endl;
+          double xVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].x));
+
+          double yVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].y));
+          cout << xVal << ", " << yVal << endl;
+          castDraw.push_back({xVal, yVal});
+        }
+        else
+        {
+          double xVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].x));
+
+          double yVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].y));
+          cout << xVal << ", " << yVal << endl;
+          temp2.push_back({xVal, yVal});
+        }
+
+      }
+      temp.clear();
+    }
+  }
+
+  //draw out the polygon created by the points.
+  //make polygon red
+  glColor3f(1.0,0,0);
+  glBegin(GL_LINES);
+    for (int i = 1; i < coordinates.size(); i++)
+    {
+      glVertex2f(coordinates[i-1].x, coordinates[i-1].y);
+      glVertex2f(coordinates[i].x, coordinates[i].y);
+    }
+  glEnd();
+
+
+	// with the draw vector, connect all of the points in the vector together.
+  glColor3f(0,1,0);
+  glBegin(GL_LINES);
+	for (int i = 1; i < castDraw.size(); i++)
+  {
+    glVertex2f(castDraw[i-1].x, castDraw[i-1].y);
+    glVertex2f(castDraw[i].x, castDraw[i].y);
+	}
+  glEnd();
+
+  //draw the single point for the t-value
+  glColor3f(1,1,0);
+  glPointSize(5.0f);
+  glBegin(GL_POINTS);
+    glVertex2f(tPoint.x, tPoint.y);
+  glEnd();
+  coordinates.clear();
+  castDraw.clear();
+}
