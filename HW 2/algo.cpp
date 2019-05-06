@@ -434,29 +434,30 @@ void algo::Aitkens (vector<dim> coordinates, double t, int res)
       temp2.clear();
       for (int j = 0; j < temp.size() - 1 ; j++)
       {
+        int plusR = (looper.size() + 1) - temp.size();
         cout << j << endl;
         if (i == 0)
         {
-          double xVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (looper[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (looper[j + 1].x));
+          double xVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j + 1].x));
 
-          double yVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (looper[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (looper[j + 1].y));
+          double yVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (looper[j + 1].y));
           cout << xVal << ", " << yVal << endl;
           temp2.push_back({xVal, yVal});
         }
         else if (i == looper.size() - 2)
         {
           cout << "spitout" << endl;
-          double xVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].x));
+          double xVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].x));
 
-          double yVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].y));
+          double yVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].y));
           cout << xVal << ", " << yVal << endl;
           castDraw.push_back({xVal, yVal});
         }
         else
         {
-          double xVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].x));
+          double xVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].x)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].x));
 
-          double yVal = ((tIndex[j + 1] - tVals[h]) / (tIndex[j + 1] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + 1] - tIndex[j]) * (temp[j + 1].y));
+          double yVal = ((tIndex[j + plusR] - tVals[h]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j].y)) + ((tVals[h] - tIndex[j]) / (tIndex[j + plusR] - tIndex[j]) * (temp[j + 1].y));
           cout << xVal << ", " << yVal << endl;
           temp2.push_back({xVal, yVal});
         }
