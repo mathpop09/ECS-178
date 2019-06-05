@@ -6,31 +6,47 @@
 #include <chrono>
 using namespace std;
 
-vector<vector<dim>> curves;
-vector<dim> coordinates;
+vector<threeDim> coordinates;
 
-//Store the Bernstein Curves
-vector<vector<dim>> BernsteinCurves;
+//Note that for this first assignment all the beginnig indexs will be 0 since we are creating one NURBS surface
 
-//Stors the derivative vectors for the curve
-vector<bSpline> bSplines;
+/*NURBS defined by:*/
 
-int pointsNum = 0;
+//two orders k and l
+//Index of Surfaces --> Index for orders on a single surface
+vector<orders> nurbOrderVec;
+
+//control points d_ij = (x_ij, y_ij, z_ij)^Transpose, i = 0, ... , m   j = 0, ... , n
+//Index of Surfaces --> Index for control points on a single surface
+vector<cpDim> cpDimensions;
+vector<vector<vector<threeDim>>> controlPoints;
+
+//real weights w_ij, i = 0, ... , m  j = 0, ... , n
+//Index of Surfaces --> Index for weights on a single surface
+vector<vector<vector<double>>> weights;
+
+//a set of real u-knots, {u_0, ..., u_m+k | u_i <= u_i+1, i = 0, ..., (m + k - 1)}
+//Index of Surfaces --> Index for weights on a single surface
+vector<vector<double>> uKnots;
+
+//a set of real v-knots, {v_0, ..., v_n+l | v_j <= v_j+1, j = 0, ..., (n + l - 1)}
+vector<vector<double>> vKnots;
+
+//One global resolution for all NURBS
 
 int res = 0;
 
-int realPType = 0;
+
+int pointsNum = 0;
+
+
 
 algo ag;
 
-int order = 0;
-
-dim vector1;
-
-dim vector2;
-
+/*
 void BSplineCalcRe()
 {
+
 	cout << "Curve 0: " << endl;
 	for (int j = 0; j < BernsteinCurves[0].size(); j++)
 	{
@@ -68,16 +84,29 @@ void BSplineCalcRe()
 	glutSwapBuffers();
 	BSplineCalcRe();
 }
+*/
 
-void BSplineCalc()
+void NURBSCalc()
 {
-	cout << "Hello! What order is your B-Spline Curve? (de Boors)" << endl;
-	cin >> order;
-	string points;
+	cout << "Hello! What are the orders of your 3D NURBS Curve?" << endl;
+	int order1;
+	int order2;
+	cin >> order1 >> order2;
+	orders orderCombo = {order1, order2};
+	nurbOrderVec.push_back(orderCombo);
+
+
 	cout << "What resolution would you like your curve to be?" << endl;
 	cin >> res;
-	cout << "Hello! How many control points is your B-Spline Curve? (de Boors)" << endl;
-	cin >> points;
+
+	string rowCP;
+	string columnCP;
+	cout << "Hello! What are the dimensions of the control points of your NURBs Curve?" << endl;
+	cin >> rowCP >> columnCP;
+	cpDim pair = {stoi(rowCP), stoi(columnCP)};
+	cpDimensions.push_back(pair);
+
+	/*
 	cout << "Please enter your " << points << " control points. Format: x y" << endl;
 	//loop over the number of control points
 	for (int i = 0; i < stoi(points); i++)
@@ -85,211 +114,27 @@ void BSplineCalc()
 			double coorX = 0;
 			double coorY = 0;
 			cout << "Control Point " << (i + 1) << ": " << endl;
-			cin >> coorX >> coorY;
+			cin >> coorX >> coorY>>
 			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
 			coordinates.push_back({coorX, coorY});
 	}
-	BernsteinCurves.push_back(coordinates);
+	controlPoints.push_back(coordinates);
 	coordinates.clear();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glFlush();
 
-	for (int k = 0; k < BernsteinCurves.size(); k++)
+	for (int k = 0; k < controlPoints.size(); k++)
 	{
-		ag.deBoors(BernsteinCurves[k], order, res);
+
 	}
+	*/
 	glutSwapBuffers();
-	BSplineCalcRe();
-}
-
-void NaturalCubicSplineRe()
-{
-	cout << "Curve 0: " << endl;
-	for (int j = 0; j < BernsteinCurves[0].size(); j++)
-	{
-		cout << "  Index: " << j << " " << BernsteinCurves[0][j].x << ", " << BernsteinCurves[0][j].y << endl;
-	}
-
-	cout << "Please send me the curve you want to modify and the proper modifications [Index Number] [(I)nsert/(D)elete]" << endl;
-	int iNum;
-	cin >> iNum;
-
-	string insDel;
-	cin >> insDel;
-
-	if (insDel == "I")
-	{
-		cout << "What are the coordinates?" << endl;
-		double xcoor;
-		double ycoor;
-		cin >> xcoor >> ycoor;
-		BernsteinCurves[0].insert(BernsteinCurves[0].begin() + iNum, {xcoor, ycoor});
-	}
-	else
-	{
-		BernsteinCurves[0].erase(BernsteinCurves[0].begin() + iNum);
-	}
-
-	cout << "get here" << endl;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (int k = 0; k < BernsteinCurves.size(); k++)
-	{
-		ag.c2Algo(BernsteinCurves[k], realPType, res);
-	}
-	glutSwapBuffers();
-	NaturalCubicSplineRe();
-}
-
-void NaturalCubicSpline()
-{
-	string points;
-	cout << "Hello! How many points would you like to interpolate?" << endl;
-	cin >> points;
-	cout << "What resolution would you like your curve to be?" << endl;
-	cin >> res;
-	string pType;
-	cout << "What kind of parametrization do you desire? [U]niform/[C]hord Length/C[E]ntripidal Parametrization" << endl;
-	cin >> pType;
-	if (pType == "U")
-	{
-		realPType = 1;
-	}
-	else if (pType == "C")
-	{
-		realPType = 2;
-	}
-	else if (pType == "E")
-	{
-		realPType = 3;
-	}
-	cout << "Please enter your " << points << " control points. Format: x y" << endl;
-	//loop over the number of control points
-	for (int i = 0; i < stoi(points); i++)
-	{
-			double coorX = 0;
-			double coorY = 0;
-			cout << "Control Point " << (i + 1) << ": " << endl;
-			cin >> coorX >> coorY;
-			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
-			coordinates.push_back({coorX, coorY});
-	}
-	BernsteinCurves.push_back(coordinates);
-	coordinates.clear();
-
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glFlush();
-
-	for (int k = 0; k < BernsteinCurves.size(); k++)
-	{
-		ag.c2Algo(BernsteinCurves[k], realPType, res);
-	}
-	glutSwapBuffers();
-	NaturalCubicSplineRe();
-}
-
-void QuadInterpolationRe()
-{
-	cout << "Curve 0: " << endl;
-	for (int j = 0; j < BernsteinCurves[0].size(); j++)
-	{
-		cout << "  Index: " << j << " " << BernsteinCurves[0][j].x << ", " << BernsteinCurves[0][j].y << endl;
-	}
-
-	cout << "Please send me the curve you want to modify and the proper modifications [Index Number] [(I)nsert/(D)elete]" << endl;
-	int iNum;
-	cin >> iNum;
-
-	string insDel;
-	cin >> insDel;
-
-	if (insDel == "I")
-	{
-		cout << "What are the coordinates?" << endl;
-		double xcoor;
-		double ycoor;
-		cin >> xcoor >> ycoor;
-		BernsteinCurves[0].insert(BernsteinCurves[0].begin() + iNum, {xcoor, ycoor});
-	}
-	else
-	{
-		BernsteinCurves[0].erase(BernsteinCurves[0].begin() + iNum);
-	}
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (int k = 0; k < BernsteinCurves.size(); k++)
-	{
-		ag.c1Algo(BernsteinCurves[k], vector1, vector2, res);
-	}
-	glutSwapBuffers();
-	QuadInterpolationRe();
-}
-
-void QuadInterpolation()
-{
-	string points;
-	cout << "Hello! How many points would you like to interpolate?" << endl;
-	cin >> points;
-	cout << "What resolution would you like your curve to be?" << endl;
-	cin >> res;
-	cout << "Please enter your " << points << " control points. Format: x y" << endl;
-	double partX;
-	double partY;
-	cout << "What is the derivative vector at the first point?" << endl;
-	cin >> partX >> partY;
-	vector1 = {partX, partY};
-	cout << "What is the derivative vector at the last point?" << endl;
-	cin >> partX >> partY;
-	vector2 = {partX, partY};
-
-	//loop over the number of control points
-	for (int i = 0; i < stoi(points); i++)
-	{
-			double coorX = 0;
-			double coorY = 0;
-			cout << "Control Point " << (i + 1) << ": " << endl;
-			cin >> coorX >> coorY;
-			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
-			coordinates.push_back({coorX, coorY});
-	}
-	BernsteinCurves.push_back(coordinates);
-	coordinates.clear();
-
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glFlush();
-
-	for (int k = 0; k < BernsteinCurves.size(); k++)
-	{
-		ag.c1Algo(BernsteinCurves[k], vector1, vector2, res);
-	}
-	glutSwapBuffers();
-	QuadInterpolationRe();
 }
 
 void promptUser(void)
 {
-	string CI;
-	cout << "Hello! Please choose between these three options: [C]2 Continuous piecewise cubic interpolation, [D]e Boor Algorithm, C1-continuous [Q]uadratic B-spline curve interpolation" << endl;
-	cin >> CI;
-	if (CI == "C")
-	{
-		NaturalCubicSpline();
-	}
-	else if (CI == "D")
-	{
-		// Perform Bspline
-		BSplineCalc();
-	}
-	else if (CI == "Q")
-	{
-		QuadInterpolation();
-	}
-
-
+	NURBSCalc();
 }
 
 void renderScene(void)
@@ -307,7 +152,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(400,200);
 	glutInitWindowSize(800,800);
-	glutCreateWindow("Homework 3");
+	glutCreateWindow("Homework 4");
 	// register callbacks
 	glutDisplayFunc(renderScene);
 	cout << "The dimensions of the window is 800 by 800, the bottom left is (0, 0)" << endl;

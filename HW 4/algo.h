@@ -5,40 +5,56 @@
 
 using namespace std;
 
-//data struct for coordinates
-struct dim{
-  double x;
-  double y;
+struct cpDim{
+  int row;
+  int col;
+};
+//data struct for two orders
+struct orders{
+  int uKnotO_k;
+  int vKnotO_l;
 };
 
-struct bSpline{
+//data struct for coordinates
+struct threeDim{
+  double x;
+  double y;
+  double z;
+};
+
+struct fourDim{
+  double x;
+  double y;
+  double z;
+  double w;
+};
+
+/*
+struct NURBs{
   vector<dim> control_points;
   vector<double> knots;
 };
+*/
 
-struct curve{
-  vector<dim> coordinates;
-};
+
 
 class algo{
-  //de Casteljau + Bernstein
+  //NURBS
 
 public:
-  void Bernstein (vector<dim> coordinates, int res);
-  void BSpline (vector<dim> points, vector<double> knots);
-  double EucDistance (dim point1, dim point2);
-  //enter control points and get the knot vector
-  vector<double> EucKnot(vector<dim> points, int order);
-  void c2Algo (vector<dim> coordinates, int parametrization, int res);
-  void deBoors(vector<dim> coordinates, int order, int res);
-  void c1Algo (vector<dim> coordinates, dim vector1, dim vector2, int res);
+  //project to 3D space
+  vector<threeDim> proj3Space (vector<fourDim> sStar);
 
 
 private:
+  //Move to 4D space
+  vector<fourDim> move4Space (vector<threeDim> d, vector<double> weights);
+  //evaluate in 4D space
+  vector<fourDim> eval4Space (vector<fourDim> dStar, orders orderPair);
+
+
   vector<vector<int>> Pascals (int level);
   vector<double> tridiagonal_solver(vector<double> a, vector<double> b, vector<double> c, vector<double> f);
-  double twoPointDistance (dim point1, dim point2);
-  bool isOdd(int num);
 };
 
 #endif // ALGO_H
