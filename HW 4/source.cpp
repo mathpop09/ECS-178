@@ -106,20 +106,64 @@ void NURBSCalc()
 	cpDim pair = {stoi(rowCP), stoi(columnCP)};
 	cpDimensions.push_back(pair);
 
-	/*
-	cout << "Please enter your " << points << " control points. Format: x y" << endl;
-	//loop over the number of control points
-	for (int i = 0; i < stoi(points); i++)
+
+	//resize
+	vector<vector<vector<threeDim>>> controlPoints;
+	controlPoints.resize(1);
+	weights.resize(1);
+
+	//TODO CHANGE, FOR PROJECT LATER ON
+	controlPoints[0].resize(pair.row);
+	weights[0].resize(pair.row);
+
+	for (int i = 0; i < pair.row; i++)
 	{
+		controlPoints[0][i].resize(pair.col);
+		weights[0][i].resize(pair.col);
+	}
+
+
+
+	cout << "Please enter your control points. Format: x y z" << endl;
+	cout << "After you add each control point, please enter the weight" << endl;
+
+	//loop over the number of control points
+	for (int i = 0; i < cpDimensions[0].row; i++)
+	{
+		for (int j = 0; j < cpDimensions[0].col; j++)
+		{
 			double coorX = 0;
 			double coorY = 0;
-			cout << "Control Point " << (i + 1) << ": " << endl;
-			cin >> coorX >> coorY>>
-			cout << "Coordinate X: " << coorX << " Coordinate Y: " << coorY << endl;
-			coordinates.push_back({coorX, coorY});
+			double coorZ = 0;
+			double weight = 0;
+			cout << "Control Point " << i << "," << j << ":" << endl;
+			cin >> coorX >> coorY >> coorZ;
+			cout << "Weight " << i << "," << j << ":" << endl;
+			cin >> weight;
+			controlPoints[0][i][j] = {coorX, coorY, coorZ};
+		}
 	}
-	controlPoints.push_back(coordinates);
-	coordinates.clear();
+
+	vector<double> uSKnots;
+	vector<double> vSKnots;
+	cout << "Please enter your u-knots set of size: " <<  pair.row + order1 << ". Formating: 1 2 3 4 5..." << endl;
+	for (int i = 0; i < pair.row + order1; i++)
+	{
+		double knotVal;
+		cin >> knotVal;
+		uSKnots.push_back(knotVal);
+	}
+	uKnots.push_back(uSKnots);
+
+	cout << "Please enter your v-knots set of size: " <<  pair.row + order1 << ". Formating: 1 2 3 4 5..." << endl;
+	for (int i = 0; i < pair.col + order1; i++)
+	{
+		double knotVal;
+		cin >> knotVal;
+		vSKnots.push_back(knotVal);
+	}
+	vKnots.push_back(vSKnots);
+
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glFlush();
@@ -128,7 +172,6 @@ void NURBSCalc()
 	{
 
 	}
-	*/
 	glutSwapBuffers();
 }
 
