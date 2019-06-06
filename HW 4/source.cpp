@@ -156,8 +156,8 @@ void NURBSCalc()
 	}
 	uKnots.push_back(uSKnots);
 
-	cout << "Please enter your v-knots set of size: " <<  pair.row + order1 << ". Formating: 1 2 3 4 5..." << endl;
-	for (int i = 0; i < pair.col + order1; i++)
+	cout << "Please enter your v-knots set of size: " <<  pair.col + order2 << ". Formating: 1 2 3 4 5..." << endl;
+	for (int i = 0; i < pair.col + order2; i++)
 	{
 		double knotVal;
 		cin >> knotVal;

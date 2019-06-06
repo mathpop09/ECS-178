@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <cmath>
+#include <iterator>
 #include "algo.h"
 
 using namespace std;
@@ -53,93 +54,58 @@ vector<vector<fourDim>> algo::move4Space (vector<vector<threeDim>> d, vector<vec
 double algo::basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, int order)
 {
   double uBar = mainVal;
+  int higherVal = upperVal + lowerVal + 1;
 
 
-
-  vector<vector<double>> triScheme;
-
-  //resize the triScheme
-	triScheme.resize(lowerVal+1);
-
-
-	for (int i = 0; i < lowerVal+1; i++)
-	{
-		triScheme[i].resize(lowerVal);
-	}
-
+  double triScheme[higherVal-1][higherVal];
   //initalize triangular Scheme
-  cerr << lowerVal << " end" << endl;;
-  for (int i = 1; i <= lowerVal; i++)
-  {
-      if ((knotVector[i] <= mainVal) && (mainVal < knotVector[i+1]))
-      {
-        triScheme[0][i] = 1;
-      }
-      else
-      {
-        cerr << "kek" << endl;
-        triScheme[0][i] = 0;
-      }
-  }
-  //print triScheme for test
 
-  //tri scheme testing
-  for (int i = 0; i < triScheme.size(); i++)
+  for (int g = 0; g < higherVal; g++)
   {
-    for (int j = 0; j < triScheme[i].size(); j++)
+    if ((knotVector[g] <= mainVal) && (mainVal < knotVector[g+1]))
     {
-      cerr << triScheme[j][i] << " ";
+      triScheme[0][g] = 1;
     }
-    cerr << endl;
-  }
-
-  int IValue = 0;
-  //loop over knot to find I
-  for (int x = order - 1; x < knotVector.size() - order + 1; x++)
-  {
-    if ((knotVector[x] <= uBar) && (knotVector[x+1] > uBar))
+    else
     {
-      IValue = x;
+      triScheme[0][g] = 0;
     }
   }
-
+  printf("Higher: ");
+  cerr << higherVal << endl;
   //column then row
   int counter = 0;
-  for (int j = 1; j < order; j++)
+  for (int j = 1; j < higherVal; j++)
   {
-    int calc = (IValue - (order - 1));
-    int calc2 = IValue - j;
-    int spit = calc;
-    for (int i = calc; i <= calc2; i++)
+    counter++;
+    for (int i = 0; i < higherVal - j ; i++)
     {
-      //j = i i = k
-      cerr << "----------Start:----------" << endl;
-      cerr << uBar << endl;
-      cerr << knotVector[i] << endl;
-      cerr << knotVector[i+j-1] << endl;
-      cerr << triScheme[i-1][j] << endl;
-      cerr << triScheme[i-1][j+1] << endl;
-      cerr << ((uBar - knotVector[j]) / (knotVector[i+j-1] - knotVector[i]) * triScheme[i-1][j]) + ((knotVector[i+j-1] - uBar) * triScheme[i-1][j+1]) << endl;
-      cerr << "----------End:----------" << endl;
-      triScheme[i][j] = ((uBar - knotVector[j]) / (knotVector[i+j-1] - knotVector[i]) * triScheme[i-1][j]) + ((knotVector[i+j-1] - knotVector[i]) * triScheme[i-1][j+1]);
-      //tri scheme testing
-      for (int i = 0; i < triScheme.size(); i++)
-      {
-        for (int j = 0; j < triScheme[i].size(); j++)
-        {
-          cerr << triScheme[j][i] << " ";
-        }
-        cerr << endl;
-      }
-      //end
+      //double tri = ((mainVal - knotVector[i])/(knotVector[i+j] - knotVector[i]) * triScheme[i][j-1]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[i+1]) * triScheme[i+1][j-1]);
+      /*
+      cerr << "_____START_____" << endl;
+      cerr << triScheme[j-1][i] << endl;
+      cerr << triScheme[j-1][i+1] << endl;
+      cerr << mainVal << endl;
+      cerr << knotVector[j] << endl;
+      cerr << knotVector[i+j] << endl;
+      cerr << knotVector[i+j+1] << endl;
+      cerr << knotVector[j+1] << endl;
+      cerr << "_____END_____" << endl;
+      */
+      //      double tri = ((mainVal - knotVector[j])/(knotVector[i+j] - knotVector[j]) * triScheme[j-1][i]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[j+1]) * triScheme[j-1][i+1]);
+      // double triX = (((knots[i+order] - uBar) / (knots[i+order] - knots[i + j])) * triScheme[j-1][i].x) + ((uBar - knots[i + j]) / (knots[i+order] - knots[i+j]) * triScheme[j-1][i+1].x)
+      double tri = ((mainVal - knotVector[i])/(knotVector[i+j] - knotVector[i]) * triScheme[j-1][i]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[i+1]) * triScheme[j-1][i+1]);
+      cerr << j << ", " << i << ": " << endl;
+
+      cerr << tri << endl;
+      triScheme[j][i] = tri;
     }
   }
-  return triScheme[lowerVal-1][upperVal-1];
+  return triScheme[upperVal][lowerVal];
 }
 
 
 vector<vector<fourDim>> algo::eval4Space (vector<vector<fourDim>> dStar, vector<double> uKnots, vector<double> vKnots, orders orderPair, int res){
-  cerr << "start" << endl;
 
   //number of dots to be connected
   int resolution = res;
@@ -180,49 +146,54 @@ vector<vector<fourDim>> algo::eval4Space (vector<vector<fourDim>> dStar, vector<
   int colI = dStar[0].size();
 
   //resize the nurbs vector
-  vector<vector<fourDim>> Nurbs4D;
-	Nurbs4D.resize(colI);
-
-
-	for (int i = 0; i < rowI; i++)
-	{
-		Nurbs4D[i].resize(colI);
-	}
+  fourDim Nurbs4D[rowI][colI];
 
   for (int u = 0; u < res; u++)
   {
     for (int v = 0; v < res; v++)
     {
       cerr << "u: " << u << endl;
-      cerr << uVals[u] << v <<endl;
-      cerr << "v: " << endl;
+      cerr << uVals[u] <<endl;
+      cerr << "v: " << v << endl;
       cerr << vVals[v] << endl;
-      fourDim sum1;
+      fourDim sum1 = {0, 0, 0, 0};
       for(int j = 0; j < colI ; j++)
       {
-        fourDim sum2;
         for(int i = 0; i < rowI; i++)
         {
+
           //double basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, double order);
-          double basis = basisFunc(orderPair.uKnotO_k, rowI, uVals[u], uKnots, orderPair.uKnotO_k);
-          cerr << "Dstar: " << endl;
-          cerr << dStar[i][j].x << ", " << dStar[i][j].y << ", " << dStar[i][j].z << endl;
-          sum2.x += dStar[i][j].x * basis;
-          sum2.z += dStar[i][j].y * basis;
-          sum2.y += dStar[i][j].z * basis;
-          sum2.w += dStar[i][j].w * basis;
+
+          double basis = basisFunc(orderPair.uKnotO_k, i, uVals[u], uKnots, orderPair.uKnotO_k);
+          double basis1 = basisFunc(orderPair.vKnotO_l, j, vVals[v], vKnots, orderPair.vKnotO_l);
+          sum1.x += dStar[i][j].x * basis * basis1;
+          sum1.y += dStar[i][j].y * basis * basis1;
+          sum1.z += dStar[i][j].z * basis * basis1;
+          sum1.w += dStar[i][j].w * basis * basis1;
+
         }
-        double basis1 = basisFunc(orderPair.vKnotO_l, colI, uVals[v], vKnots, orderPair.vKnotO_l);
-        sum1.x += sum2.x * basis1;
-        sum1.y += sum2.y * basis1;
-        sum1.z += sum2.z * basis1;
-        sum1.w += sum1.w * basis1;
-        cerr << "Nurbs Point: " << sum1.x << ", " << sum1.y << ", " << sum1.z << endl;
-        Nurbs4D[u][v] = sum1;
       }
+
+
+      Nurbs4D[u][v] = sum1;
     }
   }
+  vector<vector<fourDim>> vPush;
+  vPush.resize(rowI);
 
+	for (int i = 0; i < rowI; i++)
+	{
+		vPush[i].resize(colI);
+	}
+
+  for (int i = 0; i < rowI; i++)
+  {
+    for (int j = 0; j < colI; j++)
+    {
+      vPush[i][j] = Nurbs4D[i][j];
+    }
+  }
+  return vPush;
 }
 
 vector<vector<threeDim>> algo::proj3Space (vector<vector<fourDim>> sStar){
@@ -255,20 +226,26 @@ void algo::NURBS (orders order, vector<vector<threeDim>> controlPoints, vector<v
   vector<vector<fourDim>> fourDPoints = move4Space(controlPoints, weights);
 
   vector<vector<fourDim>> fourDNURBSPoints = eval4Space(fourDPoints, uKnots, vKnots, order, resolution);
-  /*
+
   vector<vector<threeDim>> projectedNURBSPoints = proj3Space (fourDNURBSPoints);
   //Draw the NURBS mesh
   int row = projectedNURBSPoints.size();
   int col = projectedNURBSPoints[0].size();
 
 
-  glColor3f(1,1,0);
+  glColor3f(1,0,1);
 	glBegin(GL_LINES);
 
 	for (int i = 0; i < row; i++)
 	{
 		for (int j = 0; j < col; j++)
 		{
+        cerr << "-----------------------" << endl;
+        cerr << projectedNURBSPoints[i][j].x << endl;
+        cerr <<  projectedNURBSPoints[i][j].y << endl;
+        cerr << projectedNURBSPoints[i][j].z << endl;
+
+
 				// if last row
 				if ((i == row - 1) && (j != col - 1))
 				{
@@ -298,5 +275,5 @@ void algo::NURBS (orders order, vector<vector<threeDim>> controlPoints, vector<v
 	}
 
   glEnd();
-  */
+
 }
