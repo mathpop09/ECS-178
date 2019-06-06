@@ -13,7 +13,7 @@
 using namespace std;
 
 
-
+//Done
 //Draw NURBS
 
 vector<vector<fourDim>> algo::move4Space (vector<vector<threeDim>> d, vector<vector<double>> weights)
