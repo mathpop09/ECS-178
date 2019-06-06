@@ -1,3 +1,4 @@
+
 #include <GL/glut.h>
 #include <math.h>
 #include <vector>
@@ -35,15 +36,10 @@ vector<vector<fourDim>> algo::move4Space (vector<vector<threeDim>> d, vector<vec
   {
     for (int j = 0; j < col; j++)
     {
-      /*
-      cerr << "dPoints: " << endl;
-      cerr << weights[i][j] << endl;
-      cerr << d[i][j].x << ", " << d[i][j].y << ", " << d[i][j].z << endl;
-      */
+
       fourDim newVectorElem = {d[i][j].x * weights[i][j], d[i][j].y * weights[i][j], d[i][j].z * weights[i][j], weights[i][j]};
 
       newVector[i][j] = newVectorElem;
-      //cerr << newVector[i][j].x << ", " << newVector[i][j].y << ", " << newVector[i][j].z << endl;
     }
   }
   return newVector;
@@ -57,7 +53,7 @@ double algo::basisFunc (int upperVal, int lowerVal, double mainVal, vector<doubl
   int higherVal = upperVal + lowerVal + 1;
 
 
-  double triScheme[higherVal-1][higherVal];
+  double triScheme[higherVal][higherVal];
   //initalize triangular Scheme
 
   for (int g = 0; g < higherVal; g++)
@@ -71,8 +67,6 @@ double algo::basisFunc (int upperVal, int lowerVal, double mainVal, vector<doubl
       triScheme[0][g] = 0;
     }
   }
-  printf("Higher: ");
-  cerr << higherVal << endl;
   //column then row
   int counter = 0;
   for (int j = 1; j < higherVal; j++)
@@ -80,24 +74,9 @@ double algo::basisFunc (int upperVal, int lowerVal, double mainVal, vector<doubl
     counter++;
     for (int i = 0; i < higherVal - j ; i++)
     {
-      //double tri = ((mainVal - knotVector[i])/(knotVector[i+j] - knotVector[i]) * triScheme[i][j-1]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[i+1]) * triScheme[i+1][j-1]);
-      /*
-      cerr << "_____START_____" << endl;
-      cerr << triScheme[j-1][i] << endl;
-      cerr << triScheme[j-1][i+1] << endl;
-      cerr << mainVal << endl;
-      cerr << knotVector[j] << endl;
-      cerr << knotVector[i+j] << endl;
-      cerr << knotVector[i+j+1] << endl;
-      cerr << knotVector[j+1] << endl;
-      cerr << "_____END_____" << endl;
-      */
-      //      double tri = ((mainVal - knotVector[j])/(knotVector[i+j] - knotVector[j]) * triScheme[j-1][i]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[j+1]) * triScheme[j-1][i+1]);
-      // double triX = (((knots[i+order] - uBar) / (knots[i+order] - knots[i + j])) * triScheme[j-1][i].x) + ((uBar - knots[i + j]) / (knots[i+order] - knots[i+j]) * triScheme[j-1][i+1].x)
-      double tri = ((mainVal - knotVector[i])/(knotVector[i+j] - knotVector[i]) * triScheme[j-1][i]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[i+1]) * triScheme[j-1][i+1]);
-      cerr << j << ", " << i << ": " << endl;
 
-      cerr << tri << endl;
+      double tri = ((mainVal - knotVector[i])/(knotVector[i+j] - knotVector[i]) * triScheme[j-1][i]) + ((knotVector[i+j+1] - mainVal)/(knotVector[i+j+1] - knotVector[i+1]) * triScheme[j-1][i+1]);
+
       triScheme[j][i] = tri;
     }
   }
@@ -109,14 +88,20 @@ vector<vector<fourDim>> algo::eval4Space (vector<vector<fourDim>> dStar, vector<
 
   //number of dots to be connected
   int resolution = res;
-  //Knot computation
-  vector<double> knots;
 
   //all the uv points that will be calculated
   double uVals[res];
   double vVals[res];
   //all the nurbs points that will be drawn to create a nurbs curve
   threeDim nurbDraw[res][res];
+
+
+
+  //Summation
+
+  int rowI = dStar.size();
+  int colI = dStar[0].size();
+
 
   int vStart = orderPair.vKnotO_l - 1;
   int vEnd = vKnots.size() - orderPair.vKnotO_l + 1;
@@ -140,25 +125,26 @@ vector<vector<fourDim>> algo::eval4Space (vector<vector<fourDim>> dStar, vector<
       uPlace += incU;
   }
 
-
-  //Summation
-  int rowI = dStar.size();
-  int colI = dStar[0].size();
-
+  vector<vector<fourDim>> Nurbs4D;
   //resize the nurbs vector
-  fourDim Nurbs4D[rowI][colI];
+  Nurbs4D.resize(res);
+
+	for (int i = 0; i < res; i++)
+	{
+		Nurbs4D[i].resize(res);
+	}
+
+
 
   for (int u = 0; u < res; u++)
   {
+
     for (int v = 0; v < res; v++)
     {
-      cerr << "u: " << u << endl;
-      cerr << uVals[u] <<endl;
-      cerr << "v: " << v << endl;
-      cerr << vVals[v] << endl;
       fourDim sum1 = {0, 0, 0, 0};
       for(int j = 0; j < colI ; j++)
       {
+
         for(int i = 0; i < rowI; i++)
         {
 
@@ -173,27 +159,21 @@ vector<vector<fourDim>> algo::eval4Space (vector<vector<fourDim>> dStar, vector<
 
         }
       }
-
-
       Nurbs4D[u][v] = sum1;
+
     }
   }
-  vector<vector<fourDim>> vPush;
-  vPush.resize(rowI);
-
-	for (int i = 0; i < rowI; i++)
-	{
-		vPush[i].resize(colI);
-	}
-
-  for (int i = 0; i < rowI; i++)
+  for (int u = 0; u < res; u++)
   {
-    for (int j = 0; j < colI; j++)
+    for (int v = 0; v < res; v++)
     {
-      vPush[i][j] = Nurbs4D[i][j];
+
     }
   }
-  return vPush;
+
+
+
+  return Nurbs4D;
 }
 
 vector<vector<threeDim>> algo::proj3Space (vector<vector<fourDim>> sStar){
@@ -240,10 +220,8 @@ void algo::NURBS (orders order, vector<vector<threeDim>> controlPoints, vector<v
 	{
 		for (int j = 0; j < col; j++)
 		{
-        cerr << "-----------------------" << endl;
-        cerr << projectedNURBSPoints[i][j].x << endl;
-        cerr <<  projectedNURBSPoints[i][j].y << endl;
-        cerr << projectedNURBSPoints[i][j].z << endl;
+
+
 
 
 				// if last row
@@ -273,7 +251,5 @@ void algo::NURBS (orders order, vector<vector<threeDim>> controlPoints, vector<v
 				}
 		}
 	}
-
   glEnd();
-
 }
