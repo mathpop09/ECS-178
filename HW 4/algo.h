@@ -42,19 +42,18 @@ class algo{
   //NURBS
 
 public:
-  //project to 3D space
-  vector<threeDim> proj3Space (vector<fourDim> sStar);
+  void NURBS (orders order, vector<vector<threeDim>> controlPoints, vector<vector<double>> weights,  vector<double> uKnots, vector<double> vKnots, int resolution);
 
 
 private:
   //Move to 4D space
-  vector<fourDim> move4Space (vector<threeDim> d, vector<double> weights);
+  vector<vector<fourDim>> move4Space (vector<vector<threeDim>> d, vector<vector<double>> weights);
   //evaluate in 4D space
-  vector<fourDim> eval4Space (vector<fourDim> dStar, orders orderPair);
-
-
-  vector<vector<int>> Pascals (int level);
-  vector<double> tridiagonal_solver(vector<double> a, vector<double> b, vector<double> c, vector<double> f);
+  vector<vector<fourDim>> eval4Space (vector<vector<fourDim>> dStar, vector<double> uKnots, vector<double> vKnots, orders orderPair, int res);
+  //Basic function computer
+  double basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, double order);
+  //project to 3D space
+  vector<vector<threeDim>> proj3Space (vector<vector<fourDim>> sStar);
 };
 
 #endif // ALGO_H

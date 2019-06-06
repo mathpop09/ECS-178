@@ -12,46 +12,218 @@ using namespace std;
 
 
 
+//Draw NURBS
 
-//Pascal's Triangle implementaion for Bernstein
-//Input the level of the triangle and then outputs a 2d vector that stores the
-//different triangle values up to the desired level
-vector<vector<int>> algo::Pascals (int level)
+vector<vector<fourDim>> algo::move4Space (vector<vector<threeDim>> d, vector<vector<double>> weights)
 {
-  vector<vector<int>> triangle;
-  vector<int> row;
-  for (int i = 0; i < level; i++)
+  int row = d.size();
+  int col = d[0].size();
+
+  //resize the vector
+  //resize the nurbs vector
+  vector<vector<fourDim>> newVector;
+
+  newVector.resize(row);
+	for (int i = 0; i < row; i++)
+	{
+		newVector[i].resize(col);
+	}
+
+
+  for (int i = 0; i < row; i++)
   {
-    //create one level
-    for (int j = 0; j <= i; j++)
+    for (int j = 0; j < col; j++)
     {
-      if ((j == 0) || (j == i))
-      {
-        row.push_back(1);
-      }
-      else
-      {
-        int pushed = triangle[i-1][j] + triangle[i-1][j-1];
-        row.push_back(pushed);
-      }
+      fourDim newVectorElem = {d[i][j].x * weights[i][j], d[i][j].y * weights[i][j], d[i][j].z * weights[i][j], weights[i][j]};
+      newVector[i][j] = newVectorElem;
     }
-    //push created level to triangle and clear the level vector
-    triangle.push_back(row);
-    row.clear();
   }
-  return triangle;
+  return newVector;
 }
 
 
-//Draw NURBS
-
-vector<fourDim> algo::move4Space (vector<threeDim> d, vector<double> weights)
+double algo::basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, double order)
 {
-  vector<fourDim> newVector;
-  for (int i = 0; i < d.size(); i++)
+  double uBar = mainVal;
+  int IValue = 0;
+
+
+  double triScheme[lowerVal][lowerVal];
+  //initalize triangular Scheme
+
+  for (int i = 0; i < lowerVal; i++)
   {
-    fourDim newVectorElem = {d[i].x * weights[i], d[i].y * weights[i], d[i].z * weights[i], weights[i]};
-    newVector.push_back(newVectorElem);
+      if ((knotVector[i] <= mainVal) && (mainVal < knotVector[i+1]))
+      {
+        triScheme[0][i] = 1;
+      }
+      else
+      {
+        triScheme[0][i] = 0;
+      }
   }
-  return newVector;
+
+  for (int i = 0; i < upperVal - 1; i++)
+  {
+    for (int j = 1; j < lowerVal; j++)
+    {
+      //j = k, i = i
+      triScheme[i][j] = ((uBar - knotVector[i]) / (knotVector[i+j-1] - knotVector[i]) * triScheme[i][j-1]) + ((knotVector[i+j-1] - knotVector[i]) * triScheme[i + 1][j-1]);
+
+    }
+  }
+  return triScheme[lowerVal-1][upperVal-1];
+}
+
+
+vector<vector<fourDim>> algo::eval4Space (vector<vector<fourDim>> dStar, vector<double> uKnots, vector<double> vKnots, orders orderPair, int res){
+
+
+  //number of dots to be connected
+  int resolution = res;
+  //Knot computation
+  vector<double> knots;
+
+  //all the uv points that will be calculated
+  double uVals[res];
+  double vVals[res];
+  //all the nurbs points that will be drawn to create a nurbs curve
+  threeDim nurbDraw[res][res];
+
+  int vStart = orderPair.vKnotO_l - 1;
+  int vEnd = vKnots.size() - orderPair.vKnotO_l + 1;
+
+  int uStart = orderPair.uKnotO_k - 1;
+  int uEnd = uKnots.size() - orderPair.uKnotO_k + 1;
+
+  double vPlace = vKnots[vStart];
+  double uPlace = uKnots[uStart];
+
+  //what to increment by every loop
+  double incV = (vKnots[vEnd] - vKnots[vStart]) / (res - 1);
+  double incU = (uKnots[uEnd] - uKnots[uStart]) / (res - 1);
+
+  for (int i = 0; i < resolution; i++)
+  {
+      vVals[i] = vPlace;
+      uVals[i] = uPlace;
+
+      vPlace += incV;
+      uPlace += incU;
+  }
+
+  //Summation
+  int rowI = dStar.size();
+  int colI = dStar[0].size();
+
+  //resize the nurbs vector
+  vector<vector<fourDim>> Nurbs4D;
+	Nurbs4D.resize(colI);
+
+
+	for (int i = 0; i < rowI; i++)
+	{
+		Nurbs4D[i].resize(colI);
+	}
+
+  for (int u = 0; u < res; u++)
+  {
+    for (int v = 0; v < res; v++)
+    {
+      fourDim sum1;
+      for(int j = 0; j <= colI ; j++)
+      {
+        fourDim sum2;
+        for(int i = 0; i <= rowI; i++)
+        {
+          //double basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, double order);
+          double basis = basisFunc(orderPair.uKnotO_k, rowI, uKnots[u], uKnots, orderPair.uKnotO_k);
+          sum2.x += dStar[i][j].x * basis;
+          sum2.z += dStar[i][j].y * basis;
+          sum2.y += dStar[i][j].z * basis;
+          sum2.w += dStar[i][j].w * basis;
+        }
+        double basis1 = basisFunc(orderPair.vKnotO_l, colI, vKnots[v], vKnots, orderPair.vKnotO_l);
+        sum1.x += sum2.x * basis1;
+        sum1.y += sum2.y * basis1;
+        sum1.z += sum2.z * basis1;
+        sum1.w += sum1.w * basis1;
+        Nurbs4D[u][v] = sum1;
+      }
+    }
+  }
+}
+
+vector<vector<threeDim>> algo::proj3Space (vector<vector<fourDim>> sStar){
+  int row = sStar.size();
+  int col = sStar[0].size();
+
+  vector<vector<threeDim>> beSpit;
+  //resize the vector
+  beSpit.resize(row);
+	for (int i = 0; i < row; i++)
+	{
+		beSpit[i].resize(col);
+	}
+
+  for (int i = 0; i < row; i++)
+  {
+    for (int j = 0; j < col; j++)
+    {
+      threeDim freeBee;
+      freeBee = {sStar[i][j].x / sStar[i][j].w, sStar[i][j].y / sStar[i][j].w, sStar[i][j].z / sStar[i][j].w};
+      beSpit[i][j] = freeBee;
+    }
+  }
+  return beSpit;
+}
+
+
+void algo::NURBS (orders order, vector<vector<threeDim>> controlPoints, vector<vector<double>> weights,  vector<double> uKnots, vector<double> vKnots, int resolution)
+{
+
+  vector<vector<fourDim>> fourDPoints = move4Space(controlPoints, weights);
+  vector<vector<fourDim>> fourDNURBSPoints = eval4Space(fourDPoints, uKnots, vKnots, order, resolution);
+  vector<vector<threeDim>> projectedNURBSPoints = proj3Space (fourDNURBSPoints);
+  //Draw the NURBS mesh
+  int row = projectedNURBSPoints.size();
+  int col = projectedNURBSPoints[0].size();
+
+
+  glColor3f(1,1,0);
+	glBegin(GL_LINES);
+
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+				// if last row
+				if ((i == row - 1) && (j != col - 1))
+				{
+					glVertex3f(projectedNURBSPoints[i][j].x, projectedNURBSPoints[i][j].y, projectedNURBSPoints[i][j].z);
+					glVertex3f(projectedNURBSPoints[i][j+1].x, projectedNURBSPoints[i][j+1].y, projectedNURBSPoints[i][j+1].z);
+
+				}
+				//if last col
+				else if ((j == col - 1) && (i != row - 1))
+				{
+					glVertex3f(projectedNURBSPoints[i][j].x, projectedNURBSPoints[i][j].y, projectedNURBSPoints[i][j].z);
+					glVertex3f(projectedNURBSPoints[i+1][j].x, projectedNURBSPoints[i+1][j].y, projectedNURBSPoints[i+1][j].z);
+
+				}
+				//if anything else
+				else if ((i != row - 1) && (i != col - 1))
+				{
+
+					glVertex3f(projectedNURBSPoints[i][j].x, projectedNURBSPoints[i][j].y, projectedNURBSPoints[i][j].z);
+					glVertex3f(projectedNURBSPoints[i+1][j].x, projectedNURBSPoints[i+1][j].y, projectedNURBSPoints[i+1][j].z);
+
+					glVertex3f(projectedNURBSPoints[i][j].x, projectedNURBSPoints[i][j].y, projectedNURBSPoints[i][j].z);
+					glVertex3f(projectedNURBSPoints[i][j+1].x, projectedNURBSPoints[i][j+1].y, projectedNURBSPoints[i][j+1].z);
+
+				}
+		}
+	}
+
+  glEnd();
 }

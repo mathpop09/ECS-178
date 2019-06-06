@@ -168,6 +168,45 @@ void NURBSCalc()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glFlush();
 
+	glColor3f(1,1,0);
+	glBegin(GL_LINES);
+
+	//Draw the control polygon
+
+	for (int i = 0; i < pair.row; i++)
+	{
+		for (int j = 0; j < pair.col; j++)
+		{
+				// if last row
+				if ((i == pair.row - 1) && (j != pair.col - 1))
+				{
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i][j+1].x, controlPoints[0][i][j+1].y, controlPoints[0][i][j+1].z);
+
+				}
+				//if last col
+				else if ((j == pair.col - 1) && (i != pair.row - 1))
+				{
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i+1][j].x, controlPoints[0][i+1][j].y, controlPoints[0][i+1][j].z);
+
+				}
+				//if anything else
+				else if ((i != pair.row - 1) && (i != pair.col - 1))
+				{
+
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i+1][j].x, controlPoints[0][i+1][j].y, controlPoints[0][i+1][j].z);
+
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i][j+1].x, controlPoints[0][i][j+1].y, controlPoints[0][i][j+1].z);
+
+				}
+		}
+	}
+
+	glEnd();
+
 	for (int k = 0; k < controlPoints.size(); k++)
 	{
 
