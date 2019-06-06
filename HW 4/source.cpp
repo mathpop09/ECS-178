@@ -43,48 +43,228 @@ int pointsNum = 0;
 
 algo ag;
 
-/*
-void BSplineCalcRe()
+
+void NURBSCalcRe()
 {
 
-	cout << "Curve 0: " << endl;
-	for (int j = 0; j < BernsteinCurves[0].size(); j++)
+	cout << "Curve Composition: " << endl;
+	cout << "Control Points: " << endl;
+	for (int i = 0; i < cpDimensions[0].row; i++)
 	{
-		cout << "  Index: " << j << " " << BernsteinCurves[0][j].x << ", " << BernsteinCurves[0][j].y << endl;
+		for (int j = 0; j < cpDimensions[0].col; j++)
+		{
+			cout << " Index: " << i << ", " << j << " " << controlPoints[0][i][j].x << ", " << controlPoints[0][i][j].y << ", " << controlPoints[0][i][j].z << endl;
+			cout << " Weight: " << weights[0][i][j] << endl;
+		}
 	}
 
-	cout << "Please send me the curve you want to modify and the proper modifications [Index Number] [(I)nsert/(D)elete]" << endl;
+	cout << "Orders k and l: " << endl;
+	cout << "k: " << nurbOrderVec[0].uKnotO_k << " l:" << nurbOrderVec[0].vKnotO_l << endl;
+	cout << "u-knots: " << endl;
+	cout << "[";
+  for (int i = 0; i < uKnots[0].size(); i++)
+  {
+    if (i != uKnots[0].size() - 1)
+    {
+      cout << uKnots[0][i] << ", ";
+    }
+    else
+    {
+      cout << uKnots[0][i] << "]" << endl;
+    }
+  }
+	cout << "v-knots: " << endl;
+	cout << "[";
+  for (int i = 0; i < vKnots[0].size(); i++)
+  {
+    if (i != vKnots[0].size() - 1)
+    {
+      cout << vKnots[0][i] << ", ";
+    }
+    else
+    {
+      cout << vKnots[0][i] << "]" << endl;
+    }
+  }
+
+	cout << "What modifications would you like to make?: " << endl;
+	cout << "[1] Changing a control point: " << endl;
+	cout << "[2] Changing a weight of a control point" << endl;
+	cout << "[3] Control point row/column deletion: " << endl;
+	cout << "[4] Control point row/column insertion: " << endl;
+	cout << "[5] Changing the order: " << endl;
+	cout << "[6] Changing the knot vector: " << endl;
+	cout << "[7] Changing the resolution: " << endl;
 	int iNum;
 	cin >> iNum;
 
 	string insDel;
 	cin >> insDel;
 
-	if (insDel == "I")
+	//CP MOD
+	if (iNum == 1)
 	{
-		cout << "What are the coordinates?" << endl;
-		double xcoor;
-		double ycoor;
-		cin >> xcoor >> ycoor;
-		BernsteinCurves[0].insert(BernsteinCurves[0].begin() + iNum, {xcoor, ycoor});
+		cout << "Please enter the index of the control point you would like to change: (x y)" << endl;
+		int i = 0;
+		int j = 0;
+		cin >> i >> j;
+		cout << "What would you like to change the control point to?: (x y z)" << endl;
+		double x = 0;
+		double y = 0;
+		double z = 0;
+		cin >> x >> y >> z;
+		controlPoints[0][i][j] = {x, y, z};
 	}
-	else
+	//CP WEIGHT MOD
+	else if (iNum == 2)
 	{
-		BernsteinCurves[0].erase(BernsteinCurves[0].begin() + iNum);
+		cout << "Please enter the index of the control point (weight) you would like to change: (x y)" << endl;
+		int i = 0;
+		int j = 0;
+		cin >> i >> j;
+		cout << "What would you like to change the weight to?: (x y z)" << endl;
+		double x = 0;
+		cin >> x;
+		weights[0][i][j] == x;
+	}
+	//CP ROW DELETION
+	else if (iNum == 3)
+	{
+		cout << "Would you like to delete a row or a column? [r/c] " << endl;
+		string RC;
+		cin >> RC;
+		if (RC == "r")
+		{
+			cout << "Which row would you like to delete? " << endl;
+			int row;
+			cin >> row;
+			if (controlPoints[0].size() > row)
+			{
+			  controlPoints[0].erase(controlPoints[0].begin() + row );
+			}
+		}
+		else
+		{
+			cout << "Which column would you like to delete? " << endl;
+			int col;
+			cin >> col;
+			for (int i = 0; i < controlPoints.size(); ++i)
+			{
+			  if (controlPoints[0][i].size() > col)
+			  {
+			    controlPoints[0][i].erase(controlPoints[0][i].begin() + col);
+			  }
+			}
+		}
+	}
+	//CP ROW INSERTION
+	else if (iNum == 4)
+	{
+		cout << "Would you like to insert a row or a column? [r/c] " << endl;
+		string RC;
+		cin >> RC;
+		if (RC == "r")
+		{
+			cout << "Where would you like to insert your row? " << endl;
+			int row;
+			cin >> row;
+
+			vector<threeDim> rowCP;
+			cout << "Please enter a row of control points of size " <<  cpDimensions[0].col << ": " << endl;
+			for (int i = 0; i < cpDimensions[0].col; i++)
+			{
+				threeDim cp;
+				double x;
+				double y;
+				double z;
+				cin >> x >> y >> z;
+				cp = {x, y, z};
+				rowCP.push_back(cp);
+			}
+
+			if (controlPoints[0].size() > row)
+			{
+			  controlPoints[0].insert(controlPoints[0].begin() + row, rowCP);
+			}
+		}
+		else
+		{
+			cout << "Where would you like to insert your column? " << endl;
+			int col;
+			cin >> col;
+
+			vector<threeDim> colCP;
+			cout << "Please enter a column of control points of size " <<  cpDimensions[0].row << ": " << endl;
+			for (int i = 0; i < cpDimensions[0].col; i++)
+			{
+				threeDim cp;
+				double x;
+				double y;
+				double z;
+				cin >> x >> y >> z;
+				cp = {x, y, z};
+				colCP.push_back(cp);
+			}
+
+			for (int i = 0; i < controlPoints[0].size(); ++i)
+			{
+			  if (controlPoints[0][i].size() > col)
+			  {
+			    controlPoints[0][i].insert(controlPoints[0][i].begin() + col, colCP[i]);
+			  }
+			}
+		}
+	}
+	//CP ORDER CHANGE
+	else if (iNum == 5)
+	{
+		cout << "Please set your new order pairs" << endl;
+		int order1;
+		int order2;
+		cin >> order1 >> order2;
+		orders orderCombo = {order1, order2};
+		nurbOrderVec[0] = (orderCombo);
+	}
+	//CP KNOT MODIFICATION
+	else if (iNum == 6)
+	{
+		vector<double> uSKnots;
+		vector<double> vSKnots;
+		cout << "Please enter your u-knots set of size: " <<  cpDimensions[0].row + nurbOrderVec[0].uKnotO_k << ". Formating: 1 2 3 4 5..." << endl;
+		for (int i = 0; i < cpDimensions[0].row + nurbOrderVec[0].uKnotO_k; i++)
+		{
+			double knotVal;
+			cin >> knotVal;
+			uSKnots.push_back(knotVal);
+		}
+		uKnots[0] = uSKnots;
+
+		cout << "Please enter your v-knots set of size: " <<  cpDimensions[0].col + nurbOrderVec[0].vKnotO_l << ". Formating: 1 2 3 4 5..." << endl;
+		for (int i = 0; i < cpDimensions[0].col + nurbOrderVec[0].vKnotO_l; i++)
+		{
+			double knotVal;
+			cin >> knotVal;
+			vSKnots.push_back(knotVal);
+		}
+		vKnots[0] = vSKnots;
+	}
+	else if (iNum == 7)
+	{
+		int resolution;
+		cout << "Please enter your new desired resolution: " << endl;
+		cin >> resolution;
+		res = resolution;
 	}
 
-	cout << "Current order is " << order << ", what would you like you new order to be?" << endl;
-	cin >> order;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (int k = 0; k < BernsteinCurves.size(); k++)
+	for (int k = 0; k < controlPoints.size(); k++)
 	{
-		ag.deBoors(BernsteinCurves[k], order, res);
+		ag.NURBS(nurbOrderVec[k], controlPoints[k], weights[k], uKnots[k], vKnots[k], res);
 	}
+
 	glutSwapBuffers();
-	BSplineCalcRe();
+	NURBSCalcRe();
 }
-*/
+
 
 void NURBSCalc()
 {
@@ -108,7 +288,6 @@ void NURBSCalc()
 
 
 	//resize
-	vector<vector<vector<threeDim>>> controlPoints;
 	controlPoints.resize(1);
 	weights.resize(1);
 
@@ -213,6 +392,7 @@ void NURBSCalc()
 		ag.NURBS(nurbOrderVec[k], controlPoints[k], weights[k], uKnots[k], vKnots[k], res);
 	}
 	glutSwapBuffers();
+	NURBSCalcRe();
 }
 
 void promptUser(void)
