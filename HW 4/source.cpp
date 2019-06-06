@@ -98,8 +98,6 @@ void NURBSCalcRe()
 	int iNum;
 	cin >> iNum;
 
-	string insDel;
-	cin >> insDel;
 
 	//CP MOD
 	if (iNum == 1)
@@ -142,6 +140,7 @@ void NURBSCalcRe()
 			{
 			  controlPoints[0].erase(controlPoints[0].begin() + row );
 			}
+			cpDimensions[0].row = cpDimensions[0].row - 1;
 		}
 		else
 		{
@@ -155,6 +154,7 @@ void NURBSCalcRe()
 			    controlPoints[0][i].erase(controlPoints[0][i].begin() + col);
 			  }
 			}
+			cpDimensions[0].col = cpDimensions[0].col - 1
 		}
 	}
 	//CP ROW INSERTION
@@ -186,6 +186,7 @@ void NURBSCalcRe()
 			{
 			  controlPoints[0].insert(controlPoints[0].begin() + row, rowCP);
 			}
+			cpDimensions[0].row = cpDimensions[0].row + 1;
 		}
 		else
 		{
@@ -213,6 +214,7 @@ void NURBSCalcRe()
 			    controlPoints[0][i].insert(controlPoints[0][i].begin() + col, colCP[i]);
 			  }
 			}
+			cpDimensions[0].col = cpDimensions[0].col + 1;
 		}
 	}
 	//CP ORDER CHANGE
@@ -255,6 +257,44 @@ void NURBSCalcRe()
 		cin >> resolution;
 		res = resolution;
 	}
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glFlush();
+
+	glColor3f(1,1,0);
+	glBegin(GL_LINES);
+
+	for (int i = 0; i < cpDimensions[0].row; i++)
+	{
+		for (int j = 0; j < cpDimensions[0].col; j++)
+		{
+				// if last row
+				if ((i == cpDimensions[0].row - 1) && (j != cpDimensions[0].col - 1))
+				{
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i][j+1].x, controlPoints[0][i][j+1].y, controlPoints[0][i][j+1].z);
+
+				}
+				//if last col
+				else if ((j == cpDimensions[0].col - 1) && (i != cpDimensions[0].row - 1))
+				{
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i+1][j].x, controlPoints[0][i+1][j].y, controlPoints[0][i+1][j].z);
+
+				}
+				//if anything else
+				else if ((i != cpDimensions[0].row- 1) && (i != cpDimensions[0].col - 1))
+				{
+
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i+1][j].x, controlPoints[0][i+1][j].y, controlPoints[0][i+1][j].z);
+
+					glVertex3f(controlPoints[0][i][j].x, controlPoints[0][i][j].y, controlPoints[0][i][j].z);
+					glVertex3f(controlPoints[0][i][j+1].x, controlPoints[0][i][j+1].y, controlPoints[0][i][j+1].z);
+
+				}
+		}
+	}
+	glEnd();
 
 	for (int k = 0; k < controlPoints.size(); k++)
 	{
