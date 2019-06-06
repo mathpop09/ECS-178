@@ -141,6 +141,7 @@ void NURBSCalc()
 			cout << "Weight " << i << "," << j << ":" << endl;
 			cin >> weight;
 			controlPoints[0][i][j] = {coorX, coorY, coorZ};
+			weights[0][i][j] = weight;
 		}
 	}
 
@@ -209,7 +210,7 @@ void NURBSCalc()
 
 	for (int k = 0; k < controlPoints.size(); k++)
 	{
-
+		ag.NURBS(nurbOrderVec[k], controlPoints[k], weights[k], uKnots[k], vKnots[k], res);
 	}
 	glutSwapBuffers();
 }

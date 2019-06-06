@@ -51,7 +51,7 @@ private:
   //evaluate in 4D space
   vector<vector<fourDim>> eval4Space (vector<vector<fourDim>> dStar, vector<double> uKnots, vector<double> vKnots, orders orderPair, int res);
   //Basic function computer
-  double basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, double order);
+  double basisFunc (int upperVal, int lowerVal, double mainVal, vector<double> knotVector, int order);
   //project to 3D space
   vector<vector<threeDim>> proj3Space (vector<vector<fourDim>> sStar);
 };
